@@ -96,10 +96,26 @@ api.mountTasksDir = function (dir) {
 }
 
 /**
+ * 任务列表路由
+ * @param {Object} ctx 
+ */
+function tasksRoute(ctx) {
+    ctx.body = { data: api.getTask(ctx.query.name) };
+}
+
+/**
  * 导出模块
  */
 module.exports = {
     namespace,
     onLoad,
-    api
+    api,
+    routes: {
+        'tasks': {
+            name: 'tasks',
+            method: 'GET',
+            path: '/tasks',
+            middleware: tasksRoute
+        }
+    }
 };
