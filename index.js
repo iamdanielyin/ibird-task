@@ -2,6 +2,7 @@
  * 模块依赖
  */
 
+const utility = require('ibird-utils');
 const CronJob = require('cron').CronJob;
 const namespace = 'ibird-task';
 const api = { tasks: {} };
