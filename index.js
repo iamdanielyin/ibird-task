@@ -13,7 +13,7 @@ const configs = {};
  * @param app
  * @param options
  */
-function onLoad(app, options) {
+function onload(app, options) {
     if (options && typeof options.dir === 'string') {
         api.mountTasksDir(options.dir);
     }
@@ -109,7 +109,7 @@ function tasksRoute(ctx) {
  */
 module.exports = {
     namespace,
-    onLoad,
+    onload,
     api,
     routes: {
         'tasks': {
