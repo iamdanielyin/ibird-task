@@ -6,7 +6,7 @@ const utility = require('ibird-utils');
 const CronJob = require('cron').CronJob;
 const namespace = 'ibird-task';
 const api = { tasks: {} };
-const configs = {}, running = {};
+const configs = {}, runnings = {};
 
 /**
  * 加载插件
@@ -53,12 +53,12 @@ api.addTask = function (opts) {
     opts.runMode = ['serial', 'parallel', 's', 'p'].indexOf(opts.runMode) >= 0 ? opts.runMode : 'serial';
     const onTick = opts.onTick;
     opts.onTick = async () => {
-        if (['serial', 's'].indexOf(opts.runMode) && running[opts.name]) return;
+        if (['serial', 's'].indexOf(opts.runMode) >= 0 && runnings[opts.name]) return;
         try {
-            running[opts.name] = true;
+            runnings[opts.name] = true;
             await onTick.call(this);
         } finally {
-            delete running[opts.name];
+            delete runnings[opts.name];
         }
     }
     api.tasks[opts.name] = new CronJob(opts);
