@@ -6,7 +6,7 @@ const utility = require('ibird-utils');
 const CronJob = require('cron').CronJob;
 const namespace = 'ibird-task';
 const api = { tasks: {} };
-const configs = {};
+const configs = {}, running = {};
 
 /**
  * 加载插件
@@ -37,14 +37,29 @@ function onload(app, options) {
  * @param {string} [opts.timeZone] - 指定运行时区（详见http://momentjs.com/timezone/）
  * @param {string} [opts.context] - 任务运行函数的上下文对象（对应函数内部的'this'，指定后函数内部不能再通过'this'调用'stop()'）
  * @param {string} [opts.runOnInit] - 是否立即触发一次执行（默认为false）
+ * @param {string} [opts.runMode] - 任务运行模式，可选值为：S（串行模式）或P（并行模式）；默认为S，即需要等待上一次任务完成后才会触发下一次执行
  */
 api.addTask = function (opts) {
     if (!opts || !opts.name) return;
+    if (!opts.onTick || typeof opts.onTick !== 'function') return;
     if (api.tasks[opts.name]) {
         api.delTask(opts.name);
     }
     if (typeof opts.start !== 'boolean') {
         opts.start = true;
+    }
+    opts.runMode = opts.runMode || 'serial';
+    opts.runMode = opts.runMode.toLowerCase();
+    opts.runMode = ['serial', 'parallel', 's', 'p'].indexOf(opts.runMode) >= 0 ? opts.runMode : 'serial';
+    const onTick = opts.onTick;
+    opts.onTick = async () => {
+        if (['serial', 's'].indexOf(opts.runMode) && running[opts.name]) return;
+        try {
+            running[opts.name] = true;
+            await onTick.call(this);
+        } finally {
+            delete running[opts.name];
+        }
     }
     api.tasks[opts.name] = new CronJob(opts);
     configs[opts.name] = opts;
