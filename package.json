@@ -1,6 +1,6 @@
 {
   "name": "ibird-task",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "A task addon for ibird.",
   "main": "index.js",
   "repository": {

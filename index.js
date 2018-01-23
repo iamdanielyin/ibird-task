@@ -6,6 +6,7 @@ const utility = require('ibird-utils');
 const CronJob = require('cron').CronJob;
 const namespace = 'ibird-task';
 const api = { tasks: {} };
+const context = {};
 const configs = {}, runnings = {};
 
 /**
@@ -14,6 +15,8 @@ const configs = {}, runnings = {};
  * @param options
  */
 function onload(app, options) {
+    context.app = app;
+    context.options = options;
     if (options && typeof options.dir === 'string') {
         api.mountTasksDir(options.dir);
     }
@@ -42,6 +45,13 @@ function onload(app, options) {
 api.addTask = function (opts) {
     if (!opts || !opts.name) return;
     if (!opts.onTick || typeof opts.onTick !== 'function') return;
+    const app = context.app;
+    if (typeof opts.runOnInit === 'number') {
+        const delay = opts.runOnInit;
+        opts.runOnInit = true;
+        setTimeout(() => { api.addTask(opts) }, delay);
+        return;
+    }
     if (api.tasks[opts.name]) {
         api.delTask(opts.name);
     }
@@ -54,12 +64,14 @@ api.addTask = function (opts) {
     const onTick = opts.onTick;
     opts.onTick = async () => {
         if (['serial', 's'].indexOf(opts.runMode) >= 0 && runnings[opts.name]) return;
+        app.info(`task '${opts.name}' is up.`);
         try {
             runnings[opts.name] = true;
             await onTick.call(this);
         } finally {
             delete runnings[opts.name];
         }
+        app.info(`task '${opts.name}' is completed.`);
     }
     api.tasks[opts.name] = new CronJob(opts);
     configs[opts.name] = opts;
