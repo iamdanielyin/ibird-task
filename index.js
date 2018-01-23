@@ -35,12 +35,14 @@ app.add = (obj) => {
     const onTick = callback;
     callback = async () => {
         if (['serial', 's'].indexOf(runMode) >= 0 && app.runnings[name]) return;
+        console.log(`task ${name} is up...`);
         try {
             app.runnings[name] = true;
             await onTick.call(this);
         } finally {
             delete app.runnings[name];
         }
+        console.log(`task ${name} is completed.`);
     }
 
     const job = schedule.scheduleJob(name, spec, callback);
