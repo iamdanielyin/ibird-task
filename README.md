@@ -1,3 +1,3 @@
-# ibird-task
+# ibird Latest Documentation
 
-A task addon for ibird.
+Please [click me](https://yinfxs.gitbooks.io/ibird/content/index.html)
