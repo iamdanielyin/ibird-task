@@ -71,7 +71,7 @@ api.addTask = function (opts) {
         } finally {
             delete runnings[opts.name];
         }
-        app.info(`task '${opts.name}' is completed.`);
+        app.info(`task '${opts.name}' is completed.\n`);
     }
     api.tasks[opts.name] = new CronJob(opts);
     configs[opts.name] = opts;
