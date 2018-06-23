@@ -37,6 +37,7 @@ function onload(app, options) {
  * @param {function} opts.onTick - 触发时的执行函数
  * @param {function} [opts.onComplete] - 任务完成时的执行函数（即当任务被'stop()'的时候触发）
  * @param {boolean} [opts.start] - 是否立即启动（默认true，表示任务对象不需要手动执行'job.start()'来启动）
+ * @param {boolean} [opts.oneOff] - 是否为一次性任务（默认false，表示任务对象仅会被执行一次，当执行成功后就会被自动清理）
  * @param {string} [opts.timeZone] - 指定运行时区（详见http://momentjs.com/timezone/）
  * @param {string} [opts.context] - 任务运行函数的上下文对象（对应函数内部的'this'，指定后函数内部不能再通过'this'调用'stop()'）
  * @param {string} [opts.runOnInit] - 是否立即触发一次执行（默认为false）
@@ -58,6 +59,7 @@ api.addTask = function (opts) {
     if (typeof opts.start !== 'boolean') {
         opts.start = true;
     }
+    opts.oneOff = !!opts.oneOff;
     opts.runMode = opts.runMode || 'serial';
     opts.runMode = opts.runMode.toLowerCase();
     opts.runMode = ['serial', 'parallel', 's', 'p'].indexOf(opts.runMode) >= 0 ? opts.runMode : 'serial';
@@ -72,6 +74,11 @@ api.addTask = function (opts) {
             delete runnings[opts.name];
         }
         app.info(`task '${opts.name}' is completed.\n`);
+
+        // 清理一次性任务
+        if (opts.oneOff && api.getTask(opts.name)) {
+            api.delTask(opts.name);
+        }
     }
     api.tasks[opts.name] = new CronJob(opts);
     configs[opts.name] = opts;
