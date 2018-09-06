@@ -135,7 +135,14 @@ api.mountTasksDir = function (dir) {
  * @param {Object} ctx 
  */
 function tasksRoute(ctx) {
-    ctx.body = { data: api.getTask(ctx.query.name) };
+    const data = {};
+    for (const name in configs) {
+        const cfg = configs[name]
+        data[name] = Object.assign({
+            running: !!api.getTask(name)
+        }, cfg);
+    }
+    ctx.body = { data };
 }
 
 /**
